@@ -273,25 +273,25 @@
         </form>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js"></script>
+    <!-- Firebase SDK v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyDJe-1kZVqgqCSmm9jA8YBL",
+            apiKey: "AIzaSyDJe-1kZVqgqCSmm9jA8YBL_M9x8cXqXkY",
             authDomain: "form-equipamentos-dr.firebaseapp.com",
             projectId: "form-equipamentos-dr",
             storageBucket: "form-equipamentos-dr.appspot.com",
             messagingSenderId: "951445803016",
-            appId: "1:951445803016:web:a3f71dda8fae7b5a4f78d",
-            measurementId: "G-QU2M74762"
+            appId: "1:951445803016:web:a3f71dda8fae7b5a4f78d6",
+            measurementId: "G-QU2M747622"
         };
 
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig );
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const storage = firebase.storage();
 
