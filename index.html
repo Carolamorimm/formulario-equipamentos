@@ -137,6 +137,7 @@
             border-radius: 6px;
             margin-bottom: 20px;
             border: 1px solid #c3e6cb;
+            text-align: center;
         }
 
         .error-message {
@@ -147,6 +148,7 @@
             border-radius: 6px;
             margin-bottom: 20px;
             border: 1px solid #f5c6cb;
+            text-align: center;
         }
 
         .loading {
@@ -210,52 +212,52 @@
         <form id="equipmentForm">
             <div class="form-group">
                 <label for="portador">Portador <span class="required">*</span></label>
-                <input type="text" id="portador" name="portador" required placeholder="Nome da pessoa responsável">
+                <input type="text" id="portador" name="entry.1234567890" required placeholder="Nome da pessoa responsável">
             </div>
 
             <div class="form-group">
                 <label for="equipamento">Equipamento <span class="required">*</span></label>
-                <input type="text" id="equipamento" name="equipamento" required placeholder="Ex: MacBook, Dell, Lenovo">
+                <input type="text" id="equipamento" name="entry.1234567891" required placeholder="Ex: MacBook, Dell, Lenovo">
             </div>
 
             <div class="form-group">
                 <label for="modelo">Modelo <span class="required">*</span></label>
-                <input type="text" id="modelo" name="modelo" required placeholder="Ex: MacBook Pro M1">
+                <input type="text" id="modelo" name="entry.1234567892" required placeholder="Ex: MacBook Pro M1">
             </div>
 
             <div class="form-group">
                 <label for="serial">Serial Number <span class="required">*</span></label>
-                <input type="text" id="serial" name="serial" required placeholder="Número de série do equipamento">
+                <input type="text" id="serial" name="entry.1234567893" required placeholder="Número de série do equipamento">
             </div>
 
             <div class="form-group">
                 <label for="hd">HD <span class="required">*</span></label>
-                <input type="text" id="hd" name="hd" required placeholder="Ex: 256GB SSD">
+                <input type="text" id="hd" name="entry.1234567894" required placeholder="Ex: 256GB SSD">
             </div>
 
             <div class="form-group">
                 <label for="processador">Processador <span class="required">*</span></label>
-                <input type="text" id="processador" name="processador" required placeholder="Ex: Intel Core i7">
+                <input type="text" id="processador" name="entry.1234567895" required placeholder="Ex: Intel Core i7">
             </div>
 
             <div class="form-group">
                 <label for="memoria">Memória <span class="required">*</span></label>
-                <input type="text" id="memoria" name="memoria" required placeholder="Ex: 16GB RAM">
+                <input type="text" id="memoria" name="entry.1234567896" required placeholder="Ex: 16GB RAM">
             </div>
 
             <div class="form-group">
                 <label for="marca">Marca <span class="required">*</span></label>
-                <input type="text" id="marca" name="marca" required placeholder="Ex: Apple, Dell, Lenovo">
+                <input type="text" id="marca" name="entry.1234567897" required placeholder="Ex: Apple, Dell, Lenovo">
             </div>
 
             <div class="form-group">
                 <label for="email">Seu e-mail <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required placeholder="seu.email@empresa.com">
+                <input type="email" id="email" name="entry.1234567898" required placeholder="seu.email@empresa.com">
             </div>
 
             <div class="form-group">
                 <label for="foto">Foto como evidência</label>
-                <input type="file" id="foto" name="foto" accept="image/*">
+                <input type="file" id="foto" name="entry.1234567899" accept="image/*">
                 <p class="info-text">Envie uma foto do equipamento como comprovante (opcional)</p>
             </div>
 
@@ -277,8 +279,31 @@
         const errorMessage = document.getElementById('errorMessage');
         const loading = document.getElementById('loading');
 
+        // ID do Google Form (substitua pelo seu ID real)
+        const FORM_ID = '1JzHDX9hwchgXfKNGH3ruV8r0wpoXWqSRSpCT9x9odhI';
+
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            // Validar campos obrigatórios
+            const portador = document.getElementById('portador').value.trim();
+            const equipamento = document.getElementById('equipamento').value.trim();
+            const modelo = document.getElementById('modelo').value.trim();
+            const serial = document.getElementById('serial').value.trim();
+            const hd = document.getElementById('hd').value.trim();
+            const processador = document.getElementById('processador').value.trim();
+            const memoria = document.getElementById('memoria').value.trim();
+            const marca = document.getElementById('marca').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!portador || !equipamento || !modelo || !serial || !hd || !processador || !memoria || !marca || !email) {
+                errorMessage.textContent = '✗ Por favor, preencha todos os campos obrigatórios.';
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+                return;
+            }
 
             // Mostrar loading
             loading.style.display = 'block';
@@ -286,35 +311,34 @@
             errorMessage.style.display = 'none';
 
             try {
-                // Criar FormData para enviar dados incluindo arquivo
-                const formData = new FormData(form);
-                
-                // Adicionar timestamp
-                formData.append('timestamp', new Date().toLocaleString('pt-BR'));
+                // Preparar dados para enviar
+                const formData = new FormData();
+                formData.append('entry.1234567890', portador);
+                formData.append('entry.1234567891', equipamento);
+                formData.append('entry.1234567892', modelo);
+                formData.append('entry.1234567893', serial);
+                formData.append('entry.1234567894', hd);
+                formData.append('entry.1234567895', processador);
+                formData.append('entry.1234567896', memoria);
+                formData.append('entry.1234567897', marca);
+                formData.append('entry.1234567898', email);
 
-                // Enviar para Formspree (você precisa criar uma conta e obter o ID do formulário)
-                // Substitua 'xyzpqwer' pelo seu ID de formulário do Formspree
-                const response = await fetch('https://formspree.io/f/xyzrdbkq', {
+                // Enviar para Google Form
+                const response = await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    mode: 'no-cors'
                 });
 
                 loading.style.display = 'none';
+                successMessage.style.display = 'block';
+                form.reset();
+                
+                // Esconder mensagem após 5 segundos
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
 
-                if (response.ok) {
-                    successMessage.style.display = 'block';
-                    form.reset();
-                    
-                    // Esconder mensagem após 5 segundos
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 5000);
-                } else {
-                    throw new Error('Erro na resposta do servidor');
-                }
             } catch (error) {
                 loading.style.display = 'none';
                 errorMessage.style.display = 'block';
