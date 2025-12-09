@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success { border-left-color: #27ae60; color: #27ae60; }
+        .error { border-left-color: #e74c3c; color: #e74c3c; }
+        .info { border-left-color: #3498db; color: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Teste de Conexão Firebase</h1>
+        <p>Use este arquivo para testar a conexão com o Firebase antes de usar o formulário principal.</p>
+
+        <div>
+            <button onclick="testConnection()">1. Testar Conexão</button>
+            <button onclick="testFirestore()">2. Testar Firestore (Escrever)</button>
+            <button onclick="testRead()">3. Testar Firestore (Ler)</button>
+            <button onclick="clearResult()">Limpar</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <!-- Firebase SDK v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            resultDiv.className = type;
+            resultDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function clearResult() {
+            resultDiv.innerHTML = '';
+            resultDiv.className = '';
+        }
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJe-1kZVqgqCSmm9jA8YBL_M9x8cXqXkY",
+            authDomain: "form-equipamentos-dr.firebaseapp.com",
+            projectId: "form-equipamentos-dr",
+            storageBucket: "form-equipamentos-dr.appspot.com",
+            messagingSenderId: "951445803016",
+            appId: "1:951445803016:web:a3f71dda8fae7b5a4f78d6",
+            measurementId: "G-QU2M747622"
+        };
+
+        let db, storage;
+
+        function testConnection() {
+            clearResult();
+            log('🔍 Testando conexão com Firebase...', 'info');
+
+            try {
+                // Verificar se Firebase SDK foi carregado
+                if (typeof firebase === 'undefined') {
+                    log('❌ Firebase SDK não foi carregado!', 'error');
+                    log('Verifique sua conexão com a internet.', 'error');
+                    return;
+                }
+                log('✅ Firebase SDK carregado com sucesso', 'success');
+
+                // Inicializar Firebase
+                firebase.initializeApp(firebaseConfig);
+                log('✅ Firebase inicializado com sucesso', 'success');
+                log(`📦 Projeto: ${firebaseConfig.projectId}`, 'success');
+
+                // Inicializar Firestore e Storage
+                db = firebase.firestore();
+                storage = firebase.storage();
+                log('✅ Firestore inicializado', 'success');
+                log('✅ Storage inicializado', 'success');
+
+                log('\n🎉 CONEXÃO OK! Pode usar o formulário principal.', 'success');
+
+            } catch (error) {
+                log('❌ ERRO: ' + error.message, 'error');
+                log('Stack: ' + error.stack, 'error');
+            }
+        }
+
+        async function testFirestore() {
+            if (!db) {
+                log('⚠️ Execute "Testar Conexão" primeiro!', 'error');
+                return;
+            }
+
+            clearResult();
+            log('💾 Testando escrita no Firestore...', 'info');
+
+            try {
+                const testData = {
+                    teste: true,
+                    mensagem: 'Teste de conexão',
+                    timestamp: new Date(),
+                    navegador: navigator.userAgent
+                };
+
+                log('📝 Enviando dados de teste...', 'info');
+                const docRef = await db.collection('equipamentos-teste').add(testData);
+                log('✅ Dados salvos com sucesso!', 'success');
+                log(`📄 ID do documento: ${docRef.id}`, 'success');
+                log('\n🎉 FIRESTORE OK! O banco está funcionando.', 'success');
+
+            } catch (error) {
+                log('❌ ERRO ao salvar: ' + error.message, 'error');
+                log('Código: ' + error.code, 'error');
+
+                if (error.code === 'permission-denied') {
+                    log('\n⚠️ PROBLEMA DE PERMISSÃO:', 'error');
+                    log('Verifique as regras de segurança no Firebase Console:', 'error');
+                    log('https://console.firebase.google.com/project/form-equipamentos-dr/firestore/rules', 'info');
+                }
+            }
+        }
+
+        async function testRead() {
+            if (!db) {
+                log('⚠️ Execute "Testar Conexão" primeiro!', 'error');
+                return;
+            }
+
+            clearResult();
+            log('📖 Testando leitura do Firestore...', 'info');
+
+            try {
+                log('🔍 Buscando equipamentos cadastrados...', 'info');
+                const snapshot = await db.collection('equipamentos').limit(5).get();
+
+                if (snapshot.empty) {
+                    log('ℹ️ Nenhum equipamento cadastrado ainda.', 'info');
+                    log('Preencha o formulário principal para adicionar dados.', 'info');
+                } else {
+                    log(`✅ Encontrados ${snapshot.size} equipamento(s):`, 'success');
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        log(`\n📄 ID: ${doc.id}`, 'success');
+                        log(`   Portador: ${data.portador}`, 'info');
+                        log(`   Equipamento: ${data.equipamento}`, 'info');
+                        log(`   Modelo: ${data.modelo}`, 'info');
+                    });
+                }
+
+            } catch (error) {
+                log('❌ ERRO ao ler: ' + error.message, 'error');
+                log('Código: ' + error.code, 'error');
+
+                if (error.code === 'permission-denied') {
+                    log('\n⚠️ PROBLEMA DE PERMISSÃO:', 'error');
+                    log('Verifique as regras de segurança no Firebase Console.', 'error');
+                }
+            }
+        }
+
+        // Log inicial
+        window.addEventListener('load', () => {
+            log('🚀 Página de teste carregada', 'info');
+            log('👉 Clique em "Testar Conexão" para começar\n', 'info');
+        });
+    </script>
+</body>
+</html>

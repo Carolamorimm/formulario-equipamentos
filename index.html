@@ -279,6 +279,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
+        console.log('🔥 Iniciando configuração do Firebase...');
+
         // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDJe-1kZVqgqCSmm9jA8YBL_M9x8cXqXkY",
@@ -290,10 +292,29 @@
             measurementId: "G-QU2M747622"
         };
 
+        // Verificar se Firebase SDK foi carregado
+        if (typeof firebase === 'undefined') {
+            console.error('❌ Firebase SDK não foi carregado!');
+            alert('Erro: Firebase SDK não carregado. Verifique sua conexão com a internet.');
+        } else {
+            console.log('✅ Firebase SDK carregado com sucesso');
+        }
+
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase inicializado com sucesso');
+            console.log('📦 Projeto:', firebaseConfig.projectId);
+        } catch (error) {
+            console.error('❌ Erro ao inicializar Firebase:', error);
+            alert('Erro ao inicializar Firebase: ' + error.message);
+        }
+
         const db = firebase.firestore();
         const storage = firebase.storage();
+
+        console.log('✅ Firestore e Storage prontos');
+        console.log('📊 Collection: equipamentos');
 
         const form = document.getElementById('equipmentForm');
         const successMessage = document.getElementById('successMessage');
@@ -302,6 +323,7 @@
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('📝 Formulário submetido!');
 
             // Coletar dados do formulário
             const formData = {
@@ -318,10 +340,13 @@
                 fotoURL: null
             };
 
+            console.log('📋 Dados coletados:', formData);
+
             // Validar campos obrigatórios
-            if (!formData.portador || !formData.equipamento || !formData.modelo || 
-                !formData.serial || !formData.hd || !formData.processador || 
+            if (!formData.portador || !formData.equipamento || !formData.modelo ||
+                !formData.serial || !formData.hd || !formData.processador ||
                 !formData.memoria || !formData.marca || !formData.email) {
+                console.warn('⚠️ Validação falhou: campos obrigatórios vazios');
                 errorMessage.textContent = '✗ Por favor, preencha todos os campos obrigatórios.';
                 errorMessage.style.display = 'block';
                 setTimeout(() => {
@@ -329,6 +354,8 @@
                 }, 5000);
                 return;
             }
+
+            console.log('✅ Validação passou');
 
             // Mostrar loading
             loading.style.display = 'block';
@@ -339,29 +366,46 @@
                 // Fazer upload da foto se existir
                 const fotoInput = document.getElementById('foto');
                 if (fotoInput.files && fotoInput.files[0]) {
+                    console.log('📸 Iniciando upload da foto...');
                     const file = fotoInput.files[0];
+                    console.log('📸 Arquivo:', file.name, '| Tamanho:', (file.size / 1024).toFixed(2), 'KB');
+
                     const storageRef = storage.ref('fotos/' + Date.now() + '_' + file.name);
-                    await storageRef.put(file);
+                    const uploadTask = await storageRef.put(file);
+                    console.log('✅ Upload da foto concluído');
+
                     formData.fotoURL = await storageRef.getDownloadURL();
+                    console.log('🔗 URL da foto:', formData.fotoURL);
+                } else {
+                    console.log('ℹ️ Nenhuma foto selecionada');
                 }
 
                 // Salvar dados no Firestore
-                await db.collection('equipamentos').add(formData);
+                console.log('💾 Salvando dados no Firestore...');
+                const docRef = await db.collection('equipamentos').add(formData);
+                console.log('✅ Dados salvos com sucesso! ID do documento:', docRef.id);
 
                 loading.style.display = 'none';
+                successMessage.textContent = '✓ Formulário enviado com sucesso! ID: ' + docRef.id;
                 successMessage.style.display = 'block';
                 form.reset();
-                
+
+                console.log('🎉 Processo completo!');
+
                 // Esconder mensagem após 5 segundos
                 setTimeout(() => {
                     successMessage.style.display = 'none';
                 }, 5000);
 
             } catch (error) {
+                console.error('❌ ERRO no processo de envio:', error);
+                console.error('❌ Código do erro:', error.code);
+                console.error('❌ Mensagem:', error.message);
+                console.error('❌ Stack:', error.stack);
+
                 loading.style.display = 'none';
                 errorMessage.textContent = '✗ Erro ao enviar: ' + error.message;
                 errorMessage.style.display = 'block';
-                console.error('Erro:', error);
 
                 // Esconder mensagem após 5 segundos
                 setTimeout(() => {
